@@ -6,11 +6,25 @@ const uiRouter = require('angular-ui-router');
 import routes from './search.routes';
 
 export class SearchComponent {
-  /*@ngInject*/
-  constructor() {
-    this.message = 'Hello';
-  }
+	// Instances of global objects
+	$http;
+
+	/*@ngInject*/
+	constructor($http) {
+		this.$http = $http;
+	}
+  
+  $onInit() {
+    console.log("AA: "+this.$http);
+/*		this.$http.get('/api/polls')
+			.then(response => {
+				this.polls = response.data;
+			});*/
+	}
+
 }
+
+SearchComponent.$inject = ['$http'];
 
 export default angular.module('smgNightlifeApp.search', [uiRouter])
   .config(routes)

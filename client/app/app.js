@@ -30,7 +30,7 @@ import SearchComponent from './search/search.component';
 import './app.scss';
 
 angular.module('smgNightlifeApp', [ngCookies, ngResource, ngSanitize, uiRouter, uiBootstrap, _Auth,
-  account, admin, navbar, footer, main, constants, util, AboutComponent
+  account, admin, navbar, footer, main, constants, util, AboutComponent, SearchComponent
 ])
   .config(routeConfig)
   .run(function($rootScope, $location, Auth) {

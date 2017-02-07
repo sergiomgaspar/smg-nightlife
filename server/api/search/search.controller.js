@@ -12,11 +12,169 @@
 
 import jsonpatch from 'fast-json-patch';
 import Search from './search.model';
+var Yelp = require('yelp');
+
+
+
+
+/* Retrieves data from Yelp + MongoDB */
+export function show(req, res) {
+  var yelp = new Yelp({
+    consumer_key: oauth_consumer_key,
+    consumer_secret: consumerSecret,
+    token: oauth_token,
+    token_secret: tokenSecret,
+  });
+
+  // Call YELP API
+  yelp.search({
+    location: req.params.id,
+    sort: 2,  // Highest Rated
+    limit: 40,
+    term: 'nightlife'
+  }, function (err, data) {
+    if (err) {
+      console.log("Error while getting Yelp results");
+      console.log(err);
+      //return  handleError(res);
+      return res.status(500).send(err);
+    }
+    var venuesList = [];
+    for (var i = 0; i < data.total; i++) {
+      venuesList.push({
+        yelpId: data.businesses[i].id,
+        name: data.businesses[i].name,
+        rating: data.businesses[i].rating,
+        url: data.businesses[i].url,
+        imageUrl: data.businesses[i].image_url,
+        location: data.businesses[i].location.city,
+        description: data.businesses[i].snippet_text
+      });
+    }
+    Search.find({}, function (err, resFind) {
+      var result = mergeLists(venuesList, resFind);
+      //console.log(result);
+      console.log("Returning result of size: " + result.length);
+      //return respondWithResult(result);
+      return res.status(200).send(result);
+    });
+
+  });
+}
+
+/* Returns merged list of Yelp locations and users atending */
+function mergeLists(yelp, venues) {
+  var result = [];
+  for (var i = 0; i < yelp.length; i++) {
+    var count_users = 0;
+    var all_users = [];
+    for (var j = 0; j < venues.length; j++) {
+      if (yelp[i].yelpId === venues[j].yelpid) {
+        count_users++;
+        all_users.push({
+          userId: venues[j].userId,
+          userName: venues[j].userName
+        });
+      }
+    }
+    result.push(yelp[i]);
+    result[i].countUsers = count_users;
+    result[i].allUsers = all_users;
+  }
+  return result;
+}
+
+/*
+function xpto(res) {
+  console.log("XPTO");
+  console.log("SIZE: " + res.length);
+  for (var i = 0; i < res.length; i++) {
+    console.log(res[i]);
+  }
+};*/
+/*
+function treatResult (res) {
+  console.log("ENTERING TREAT RESULT");
+  var answer = this.data.businesses.Map(function(business) {
+          return {
+            yelpId: business.id, 
+            name: business.name,
+            rating: business.rating
+          }
+  });
+
+  console.log("ANSWER:");
+  console.log(answer);
+  respondWithResult(res);
+}*/
+/*
+SAMPLE API RESPONSE:
+{
+    "businesses": [
+        {
+            "categories": [
+                [
+                    "Local Flavor",
+                    "localflavor"
+                ],
+                [
+                    "Mass Media",
+                    "massmedia"
+                ]
+            ],
+            "display_phone": "+1-415-908-3801",
+            "id": "yelp-san-francisco",
+            "image_url": "http://s3-media3.fl.yelpcdn.com/bphoto/nQK-6_vZMt5n88zsAS94ew/ms.jpg",
+            "is_claimed": true,
+            "is_closed": false,
+            "location": {
+                "address": [
+                    "140 New Montgomery St"
+                ],
+                "city": "San Francisco",
+                "coordinate": {
+                    "latitude": 37.7867703362929,
+                    "longitude": -122.399958372115
+                },
+                "country_code": "US",
+                "cross_streets": "Natoma St & Minna St",
+                "display_address": [
+                    "140 New Montgomery St",
+                    "Financial District",
+                    "San Francisco, CA 94105"
+                ],
+                "geo_accuracy": 9.5,
+                "neighborhoods": [
+                    "Financial District",
+                    "SoMa"
+                ],
+                "postal_code": "94105",
+                "state_code": "CA"
+            },
+            "mobile_url": "http://m.yelp.com/biz/yelp-san-francisco",
+            "name": "Yelp",
+            "phone": "4159083801",
+            "rating": 2.5,
+            "rating_img_url": "http://s3-media4.fl.yelpcdn.com/assets/2/www/img/c7fb9aff59f9/ico/stars/v1/stars_2_half.png",
+            "rating_img_url_large": "http://s3-media2.fl.yelpcdn.com/assets/2/www/img/d63e3add9901/ico/stars/v1/stars_large_2_half.png",
+            "rating_img_url_small": "http://s3-media4.fl.yelpcdn.com/assets/2/www/img/8e8633e5f8f0/ico/stars/v1/stars_small_2_half.png",
+            "review_count": 7140,
+            "snippet_image_url": "http://s3-media4.fl.yelpcdn.com/photo/YcjPScwVxF05kj6zt10Fxw/ms.jpg",
+            "snippet_text": "What would I do without Yelp?\n\nI wouldn't be HALF the foodie I've become it weren't for this business.    \n\nYelp makes it virtually effortless to discover new...",
+            "url": "http://www.yelp.com/biz/yelp-san-francisco"
+        }
+    ],
+    "total": 2316
+}~
+*/
+
+////////////////////////////////////////////////////////////////
+
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
-  return function(entity) {
-    if(entity) {
+  return function (entity) {
+    if (entity) {
       return res.status(statusCode).json(entity);
     }
     return null;
@@ -24,10 +182,10 @@ function respondWithResult(res, statusCode) {
 }
 
 function patchUpdates(patches) {
-  return function(entity) {
+  return function (entity) {
     try {
       jsonpatch.apply(entity, patches, /*validate*/ true);
-    } catch(err) {
+    } catch (err) {
       return Promise.reject(err);
     }
 
@@ -36,8 +194,8 @@ function patchUpdates(patches) {
 }
 
 function removeEntity(res) {
-  return function(entity) {
-    if(entity) {
+  return function (entity) {
+    if (entity) {
       return entity.remove()
         .then(() => {
           res.status(204).end();
@@ -47,8 +205,8 @@ function removeEntity(res) {
 }
 
 function handleEntityNotFound(res) {
-  return function(entity) {
-    if(!entity) {
+  return function (entity) {
+    if (!entity) {
       res.status(404).end();
       return null;
     }
@@ -58,7 +216,7 @@ function handleEntityNotFound(res) {
 
 function handleError(res, statusCode) {
   statusCode = statusCode || 500;
-  return function(err) {
+  return function (err) {
     res.status(statusCode).send(err);
   };
 }
@@ -70,13 +228,7 @@ export function index(req, res) {
     .catch(handleError(res));
 }
 
-// Gets a single Search from the DB
-export function show(req, res) {
-  return Search.findById(req.params.id).exec()
-    .then(handleEntityNotFound(res))
-    .then(respondWithResult(res))
-    .catch(handleError(res));
-}
+
 
 // Creates a new Search in the DB
 export function create(req, res) {
@@ -87,10 +239,10 @@ export function create(req, res) {
 
 // Upserts the given Search in the DB at the specified ID
 export function upsert(req, res) {
-  if(req.body._id) {
+  if (req.body._id) {
     delete req.body._id;
   }
-  return Search.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true}).exec()
+  return Search.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }).exec()
 
     .then(respondWithResult(res))
     .catch(handleError(res));
@@ -98,7 +250,7 @@ export function upsert(req, res) {
 
 // Updates an existing Search in the DB
 export function patch(req, res) {
-  if(req.body._id) {
+  if (req.body._id) {
     delete req.body._id;
   }
   return Search.findById(req.params.id).exec()

@@ -1,24 +1,31 @@
 <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
 <header class="hero-unit" id="banner">
-  <div class="container">
-    <h1>'Allo, 'Allo!</h1>
-    <p class="lead">Kick-start your next web app with Angular Fullstack</p>
-    <img src="assets/images/yeoman.png" alt="I'm Yeoman">
-  </div>
+   <div class="container" id = "mainContainer">
+      <img class="img-responsive" id = "fcc-logo" src="assets/images/fcc.png" alt="FCC"> 
+      <h1>Nightlife Coordination</h1>
+      <p class="lead">"Where do you want to go today?"</p>
+   </div>
 </header>
 
-<div id="query">
-        <form onsubmit="submitFn(this, event);">
-            <div class="search-wrapper">
-                <div class="input-holder">
-                    <input type="text" class="search-input" placeholder="Type to search (leave empty for random search)" />
-                    <button class="search-icon" onclick="searchToggle(this, event);"><span></span></button>
-                </div>
-                <span class="close" onclick="searchToggle(this, event);"></span>
-                <div class="result-container">
+<div class = "col-lg-12" id = "searchDiv">
+  <input type="text" name="searchString" class="form-control" ng-model="mainCtrl.searchString" 
+      ng-keypress="($event.charCode==13 && mainCtrl.searchString.length > 0)? mainCtrl.newSearch() : return"
+      required/>
+  
+</div>
+<div class = "col-lg-12 searchButton" id = "searchDiv">
+  <a href="#" ng-click="mainCtrl.searchString.length > 0 && mainCtrl.newSearch()">Search Location</a>
+</div>
 
-                </div>
+<div class = "col-lg-12" id="results">
+   <div id="resultsSection" class="row pull-center">
+         <div id="resultContentList" >
+            <div class="result-list-container" ng-repeat="venue in mainCtrl.venues">
+               <!--    <a href="https://en.wikipedia.org/wiki?curid='+ pageid +'\" ><h2>title</h2><p>extract</p></a> -->
+               Name: {{venue.name}} <br>
+               Description: {{venue.description}} <br>
+               Users going: {{venue.countUsers}}
             </div>
-        </form>
- </div>
-
+         </div>
+   </div>
+</div>
