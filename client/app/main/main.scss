@@ -33,20 +33,13 @@
 }
 
 #searchDiv {
-  max-width: 50%; 
-//  margin: 20px 25%;
-
   margin: 20px auto;
 }
  
 
 .searchButton {
- // margin-top: 20px;
- // margin-left: auto;
-  //  margin-right: auto;
   text-align:center;
   margin: 20px auto;
- // max-width: 300px;
 	-moz-box-shadow: 0px 0px 0px 2px #9fb4f2;
 	-webkit-box-shadow: 0px 0px 0px 2px #9fb4f2;
 	box-shadow: 0px 0px 0px 2px #9fb4f2;
@@ -89,10 +82,9 @@
 /* Results list */
 .result-list-container {
   position: relative;
-  bottom: 400;
+  bottom: 300;
   min-width: 150px;
   margin: 0 auto;
-  margin: 15px;
   padding: 20px;
   background-color: tansparent;
   border-radius: 25px;
@@ -113,4 +105,9 @@
 .result-list-container:hover {
   transform: scale(1.1);
   text-decoration: none !important;
+}
+
+#countGoers{
+  margin: 5px auto;
+  text-align: center;
 }

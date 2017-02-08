@@ -1,10 +1,7 @@
 /**
  * Using Rails-like standard naming convention for endpoints.
- * GET     /api/search              ->  index
  * POST    /api/search              ->  create
  * GET     /api/search/:id          ->  show
- * PUT     /api/search/:id          ->  upsert
- * PATCH   /api/search/:id          ->  patch
  * DELETE  /api/search/:id          ->  destroy
  */
 
@@ -16,6 +13,12 @@ var Yelp = require('yelp');
 
 
 
+/*
+var consumerSecret = process.env.ConsumerSecret,
+  tokenSecret = process.env.TokenSecret,
+  oauth_consumer_key = process.env.ConsumerKey,
+  oauth_token = process.env.Token;
+  */
 
 /* Retrieves data from Yelp + MongoDB */
 export function show(req, res) {
@@ -36,7 +39,6 @@ export function show(req, res) {
     if (err) {
       console.log("Error while getting Yelp results");
       console.log(err);
-      //return  handleError(res);
       return res.status(500).send(err);
     }
     var venuesList = [];
@@ -55,7 +57,6 @@ export function show(req, res) {
       var result = mergeLists(venuesList, resFind);
       //console.log(result);
       console.log("Returning result of size: " + result.length);
-      //return respondWithResult(result);
       return res.status(200).send(result);
     });
 
@@ -69,9 +70,10 @@ function mergeLists(yelp, venues) {
     var count_users = 0;
     var all_users = [];
     for (var j = 0; j < venues.length; j++) {
-      if (yelp[i].yelpId === venues[j].yelpid) {
+      if (yelp[i].yelpId === venues[j].yelpId) {
         count_users++;
         all_users.push({
+          _id: venues[j]._id,
           userId: venues[j].userId,
           userName: venues[j].userName
         });
@@ -84,29 +86,6 @@ function mergeLists(yelp, venues) {
   return result;
 }
 
-/*
-function xpto(res) {
-  console.log("XPTO");
-  console.log("SIZE: " + res.length);
-  for (var i = 0; i < res.length; i++) {
-    console.log(res[i]);
-  }
-};*/
-/*
-function treatResult (res) {
-  console.log("ENTERING TREAT RESULT");
-  var answer = this.data.businesses.Map(function(business) {
-          return {
-            yelpId: business.id, 
-            name: business.name,
-            rating: business.rating
-          }
-  });
-
-  console.log("ANSWER:");
-  console.log(answer);
-  respondWithResult(res);
-}*/
 /*
 SAMPLE API RESPONSE:
 {
