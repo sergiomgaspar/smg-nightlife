@@ -11,14 +11,11 @@ import jsonpatch from 'fast-json-patch';
 import Search from './search.model';
 var Yelp = require('yelp');
 
-
-
-/*
 var consumerSecret = process.env.ConsumerSecret,
   tokenSecret = process.env.TokenSecret,
   oauth_consumer_key = process.env.ConsumerKey,
   oauth_token = process.env.Token;
-  */
+  
 
 /* Retrieves data from Yelp + MongoDB */
 export function show(req, res) {
