@@ -9,7 +9,7 @@ This app uses the Yelp API to identify local venues and provide links and review
 
 ### APP description
 
-The app allows for a user to post, delete and vote on an existing poll. Below is a list of use cases.
+Below is a list of use cases.
 
   - **Use-case 1:** As an unauthenticated user, I can view all bars in my area.
   - **Use-case 2:** As an authenticated user, I can add myself to a bar to indicate I am going there tonight.
